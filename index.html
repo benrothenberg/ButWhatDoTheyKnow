@@ -271,11 +271,13 @@
     }
 
     try {
-      const res = await fetch(GOOGLE_WEB_APP_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      const body = new URLSearchParams();
+body.append("payload", JSON.stringify(payload));
+
+const res = await fetch(GOOGLE_WEB_APP_URL, {
+  method: "POST",
+  body
+});
 
       const text = await res.text();
       console.log("Apps Script response:", text);
@@ -306,3 +308,4 @@
 
 </body>
 </html>
+
