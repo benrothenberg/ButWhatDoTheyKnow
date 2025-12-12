@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>But What Do They Know? Demo Game</title>
 
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
@@ -21,7 +20,6 @@
   h1 {
     text-align: center;
     margin-bottom: 40px;
-    font-family: 'Merriweather', serif;
     font-size: 2.8rem;
     font-weight: 700;
     background: linear-gradient(90deg, #3a5fcd, #a0c0ff, #3a5fcd);
@@ -45,10 +43,6 @@
                  0 0 20px rgba(160, 192, 255, 0.5); }
     100% { text-shadow: 0 0 20px rgba(58, 95, 205, 0.9),
                    0 0 40px rgba(160, 192, 255, 0.7); }
-  }
-
-  .glow-spark {
-    animation: glow 0.5s ease forwards;
   }
 
   .question-block {
@@ -88,7 +82,7 @@
   input[type="range"] {
     -webkit-appearance: none;
     width: 100%;
-    height: 4px;  /* thinner bar */
+    height: 4px;
     border-radius: 2px;
     background: linear-gradient(to right, #2644b5 50%, #a0c0ff 50%);
     position: absolute;
@@ -135,6 +129,16 @@
     100% { transform: translate(-50%, -50%) scale(1); }
   }
 
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: 'Merriweather', serif;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
   button[type="submit"] {
     background-color: #a0c0ff;
     color: #000;
@@ -163,131 +167,142 @@
   <span class="subtitle">Demo Game</span>
 </h1>
 
-<form id="gameForm">
-
-<!-- NAME FIELD -->
-<div class="question-block">
-  <label for="name">Your name?</label>
-  <input type="text" id="name" name="name" required
-         style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
-</div>
-
-<script>
-const questions = 6;
-for (let i = 1; i <= questions; i++) {
-  document.write(`
+<form id="gameForm" novalidate>
+  <!-- Name -->
   <div class="question-block">
-    <label for="q${i}_range">What % of all players will get Question ${i} correct?</label>
-
-    <div class="slider-container">
-      <input type="range" id="q${i}_range" min="1" max="100" value="50">
-      <div class="bubble" id="q${i}_bubble">50</div>
-    </div>
-
-    <div class="yesno-container">
-      <label>For our data, did <i>you</i> get Question ${i} correct?</label>
-      <div class="radio-group">
-        <label><input type="radio" name="q${i}_yesno" value="yes"> Yes</label>
-        <label><input type="radio" name="q${i}_yesno" value="no"> No</label>
-      </div>
-    </div>
+    <label for="name">Your name?</label>
+    <input type="text" id="name" name="name" required />
   </div>
-  `);
-}
-</script>
 
-<button type="submit">Submit</button>
+  <!-- Questions will be injected here -->
+  <div id="questionsMount"></div>
+
+  <button type="submit">Submit</button>
 </form>
 
-<!-- SLIDER BUBBLE SCRIPT -->
 <script>
-function valueToColor(val) {
-  if(val <= 50){
-    const g = Math.floor(val * 5.1);
-    return `rgb(255, ${g}, 0)`;
-  } else {
-    const r = Math.floor(255 - (val - 50) * 5.1);
-    return `rgb(${r}, 255, 0)`;
+  const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznAnMeSPP11esTmwuIJ-RSCIOIDVAqZl2d778HZbN8pQNFJ2LmyUkQZECya9x6_MCT/exec";
+  const questionsCount = 6;
+
+  // Build question blocks without document.write
+  const mount = document.getElementById("questionsMount");
+  for (let i = 1; i <= questionsCount; i++) {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.innerHTML = `
+      <label for="q${i}_range">What % of all players will get Question ${i} correct?</label>
+
+      <div class="slider-container">
+        <input type="range" id="q${i}_range" min="1" max="100" value="50">
+        <div class="bubble" id="q${i}_bubble">50</div>
+      </div>
+
+      <div class="yesno-container">
+        <label>For our data, did <i>you</i> get Question ${i} correct?</label>
+        <div class="radio-group">
+          <!-- required on one radio enforces a choice for the whole group -->
+          <label><input type="radio" name="q${i}_yesno" value="yes" required> Yes</label>
+          <label><input type="radio" name="q${i}_yesno" value="no"> No</label>
+        </div>
+      </div>
+    `;
+    mount.appendChild(block);
   }
-}
 
-const title = document.querySelector('h1');
+  function valueToColor(val) {
+    val = Number(val);
+    if (val <= 50) {
+      const g = Math.floor(val * 5.1);
+      return `rgb(255, ${g}, 0)`;
+    } else {
+      const r = Math.floor(255 - (val - 50) * 5.1);
+      return `rgb(${r}, 255, 0)`;
+    }
+  }
 
-function updateBubble(slider, bubble) {
-  const val = slider.value;
-  const pct = (val - slider.min) / (slider.max - slider.min);
-  const sliderWidth = slider.offsetWidth;
+  function updateBubble(slider, bubble) {
+    const val = slider.value;
+    const pct = (val - slider.min) / (slider.max - slider.min);
+    const sliderWidth = slider.offsetWidth;
 
-  bubble.style.left = `${pct * sliderWidth}px`;
-  bubble.textContent = val;
+    bubble.style.left = `${pct * sliderWidth}px`;
+    bubble.textContent = val;
 
-  const bubbleColor = valueToColor(val);
-  bubble.style.backgroundColor = bubbleColor;
+    const bubbleColor = valueToColor(val);
+    bubble.style.backgroundColor = bubbleColor;
 
-  slider.style.background = 
-    `linear-gradient(to right, #2644b5 0%, #2644b5 ${pct*100}%, #a0c0ff ${pct*100}%, #a0c0ff 100%)`;
+    slider.style.background =
+      `linear-gradient(to right, #2644b5 0%, #2644b5 ${pct * 100}%, #a0c0ff ${pct * 100}%, #a0c0ff 100%)`;
 
-  bubble.style.animation = 'bounce 0.3s';
-  bubble.addEventListener('animationend', () => bubble.style.animation = '');
+    bubble.style.animation = "bounce 0.3s";
+    bubble.addEventListener("animationend", () => (bubble.style.animation = ""), { once: true });
+  }
 
-  title.classList.add('glow-spark');
-  setTimeout(() => title.classList.remove('glow-spark'), 500);
-}
+  // Initialize sliders
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    const bubble = slider.nextElementSibling;
+    slider.addEventListener("input", () => updateBubble(slider, bubble));
+    window.addEventListener("resize", () => updateBubble(slider, bubble));
+    updateBubble(slider, bubble);
+  });
 
-document.querySelectorAll('input[type="range"]').forEach(slider => {
-  const bubble = slider.nextElementSibling;
-  slider.addEventListener('input', () => updateBubble(slider, bubble));
-  window.addEventListener('resize', () => updateBubble(slider, bubble));
-  updateBubble(slider, bubble);
-});
+  // Submit handler with restored validation + posting
+  const form = document.getElementById("gameForm");
+
+  form.addEventListener("submit", async (e) => {
+    // Use native validation UI:
+    // If anything required is missing, show browser prompts and stop.
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      form.reportValidity();
+      return;
+    }
+
+    e.preventDefault();
+
+    const payload = {
+      name: document.getElementById("name").value.trim()
+    };
+
+    for (let i = 1; i <= questionsCount; i++) {
+      payload[`q${i}_percent`] = document.getElementById(`q${i}_range`).value;
+      payload[`q${i}_yesno`] =
+        document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
+    }
+
+    try {
+      const res = await fetch(GOOGLE_WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      console.log("Apps Script response:", text);
+
+      // Try parsing JSON if present
+      let json = null;
+      try { json = JSON.parse(text); } catch {}
+
+      if (json && json.success) {
+        alert("Saved! ✅");
+        form.reset();
+
+        // Reset slider bubbles after reset
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+          slider.value = 50;
+          updateBubble(slider, slider.nextElementSibling);
+        });
+      } else {
+        alert("Save failed ❌ (check console)");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Save failed ❌ " + err);
+    }
+  });
 </script>
-
-<!-- GOOGLE SHEETS SUBMISSION SCRIPT -->
-<script>
-const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznAnMeSPP11esTmwuIJ-RSCIOIDVAqZl2d778HZbN8pQNFJ2LmyUkQZECya9x6_MCT/exec";
-
-const form = document.getElementById("gameForm");
-
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const payload = {
-    name: document.getElementById("name").value.trim()
-  };
-
-  for (let i = 1; i <= 6; i++) {
-    payload[`q${i}_percent`] = document.getElementById(`q${i}_range`).value;
-    payload[`q${i}_yesno`] =
-      document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
-  }
-
-  try {
-    const res = await fetch(GOOGLE_WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const text = await res.text();
-    console.log("Apps Script response:", text);
-
-    // optional: show a nice message
-    alert("Saved! ✅");
-
-  } catch (err) {
-    console.error(err);
-    alert("Save failed ❌ " + err);
-  }
-});
-</script>
-
 
 </body>
 </html>
-
-
-
-
-
-
-
