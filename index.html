@@ -177,7 +177,7 @@ const questions = 6;
 for (let i = 1; i <= questions; i++) {
   document.write(`
   <div class="question-block">
-    <label for="q${i}_range">What % of all players will get LL108 MD1 Q${i} correct?</label>
+    <label for="q${i}_range">What % of all players will get Question Q${i} correct?</label>
 
     <div class="slider-container">
       <input type="range" id="q${i}_range" min="1" max="100" value="50">
@@ -185,7 +185,7 @@ for (let i = 1; i <= questions; i++) {
     </div>
 
     <div class="yesno-container">
-      <label>For our data, did <i>you</i> get LL108 MD1 Q${i} correct?</label>
+      <label>For our data, did <i>you</i> get Question Q${i} correct?</label>
       <div class="radio-group">
         <label><input type="radio" name="q${i}_yesno" value="yes"> Yes</label>
         <label><input type="radio" name="q${i}_yesno" value="no"> No</label>
@@ -283,6 +283,7 @@ if (json.success) {
 
 </body>
 </html>
+
 
 
 
