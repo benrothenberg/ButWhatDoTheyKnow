@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>But What Do They Know? Demo Game</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Merriweather', serif;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #001f4d;
+    color: #fff;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-family: 'Merriweather', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #3a5fcd, #a0c0ff, #3a5fcd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(58, 95, 205, 0.7), 0 0 20px rgba(160, 192, 255, 0.5);
+    animation: glow 2.5s infinite alternate;
+    position: relative;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  h1 .subtitle {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #a0c0ff;
+    margin-top: 5px;
+    text-shadow: 0 0 5px rgba(160,192,255,0.5);
+  }
+
+  @keyframes glow {
+    0% { text-shadow: 0 0 10px rgba(58, 95, 205, 0.7), 0 0 20px rgba(160, 192, 255, 0.5); }
+    100% { text-shadow: 0 0 20px rgba(58, 95, 205, 0.9), 0 0 40px rgba(160, 192, 255, 0.7); }
+  }
+
+  .glow-spark { animation: glow 0.5s ease forwards; }
+
+  .question-block {
+    background-color: #ffffff;
+    color: #000;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    position: relative;
+  }
+
+  label { font-weight: bold; display: block; margin-bottom: 10px; }
+
+  .yesno-container {
+    background-color: #f0f0f0;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+
+  .radio-group { margin-top: 5px; display: flex; gap: 15px; }
+
+  .slider-container {
+    position: relative;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 50px;
+    height: 50px;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    margin-top: -22px;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 50px;
+    height: 50px;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .bubble {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    background-color: #eee;
+    color: #000;
+    font-weight: bold;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: background 0.25s, transform 0.2s;
+    clip-path: polygon(50% 0%, 90% 25%, 90% 75%, 50% 100%, 10% 75%, 10% 25%);
+    z-index: 3;
+  }
+
+  @keyframes bounce {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    30% { transform: translate(-50%, -55%) scale(1.1); }
+    50% { transform: translate(-50%, -50%) scale(0.95); }
+    70% { transform: translate(-50%, -52%) scale(1.05); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
+
+  input[type="text"], button[type="submit"] {
+    font-family: 'Merriweather', serif;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    padding: 15px 25px;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    box-sizing: border-box;
+  }
+
+  input[type="text"] {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: #ffffff;
+    color: #000;
+  }
+
+  button[type="submit"] {
+    background-color: #a0c0ff;
+    color: #000;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    margin: 30px auto 0 auto;
+    box-shadow: 0 0 10px rgba(58, 95, 205, 0.7), 0 0 20px rgba(160, 192, 255, 0.5);
+    animation: glow 2.5s infinite alternate;
+  }
+
+  button[type="submit"]:hover { background-color: #85b0ff; transform: scale(1.05); }
+</style>
+</head>
+<body>
+<h1>
+  But What Do <i>They</i> Know?<br>
+  <span class="subtitle">Demo Game</span>
+</h1>
+<form id="gameForm"></form>
+
+<script>
+const questions = 6;
+const form = document.getElementById('gameForm');
+
+for(let i=1;i<=questions;i++){
+  form.innerHTML += `
+  <div class="question-block">
+    <label for="q${i}_range">What % of all players will get LL108 MD1 Q${i} correct?</label>
+    <div class="slider-container">
+      <input type="range" id="q${i}_range" min="1" max="100" value="50">
+      <div class="bubble" id="q${i}_bubble">50</div>
+    </div>
+    <div class="yesno-container">
+      <label>For our data, did <i>you</i> get LL108 MD1 Q${i} correct?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="q${i}_yesno" value="yes"> Yes</label>
+        <label><input type="radio" name="q${i}_yesno" value="no"> No</label>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Name field
+form.innerHTML += `
+<div class="question-block">
+  <label for="user_name">Your name?</label>
+  <input type="text" id="user_name" name="user_name" placeholder="Enter your name">
+</div>`;
+
+form.innerHTML += `<button type="submit">Submit</button>`;
+
+// Bubble slider code
+function valueToColor(val){
+  if(val<=50){ const g=Math.floor(val*5.1); return `rgb(255,${g},0)`; }
+  else{ const r=Math.floor(255-(val-50)*5.1); return `rgb(${r},255,0)`; }
+}
+
+const title = document.querySelector('h1');
+function updateBubble(slider,bubble){
+  const val=slider.value;
+  const pct=(val-slider.min)/(slider.max-slider.min);
+  bubble.style.left=`${pct*slider.offsetWidth}px`;
+  bubble.textContent=val;
+  bubble.style.backgroundColor=valueToColor(val);
+  slider.style.background=`linear-gradient(to right,#2644b5 0%,#2644b5 ${pct*100}%,#a0c0ff ${pct*100}%,#a0c0ff 100%)`;
+  bubble.style.animation='bounce 0.3s';
+  bubble.addEventListener('animationend',()=>bubble.style.animation='');
+  title.classList.add('glow-spark');
+  setTimeout(()=>title.classList.remove('glow-spark'),500);
+}
+
+document.querySelectorAll('input[type="range"]').forEach(slider=>{
+  const bubble=slider.nextElementSibling;
+  slider.addEventListener('input',()=>updateBubble(slider,bubble));
+  window.addEventListener('resize',()=>updateBubble(slider,bubble));
+  updateBubble(slider,bubble);
+});
+
+// Form submission to Google Sheets
+const webAppURL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL'; // Replace with your Web App URL
+
+form.addEventListener('submit', async function(e){
+  e.preventDefault();
+  const data = {};
+  const nameField=document.getElementById('user_name');
+  if(!nameField.value.trim()){ alert('Please enter your name.'); nameField.focus(); return; }
+  data.name=nameField.value.trim();
+  for(let i=1;i<=6;i++){
+    const slider=document.getElementById(`q${i}_range`);
+    const radios=document.getElementsByName(`q${i}_yesno`);
+    let radioValue='';
+    for(const r of radios){ if(r.checked) radioValue=r.value; }
+    if(!radioValue){ alert(`Please answer Yes/No for Q${i}`); return; }
+    data[`Q${i}`]={ slider: slider.value, yesno: radioValue };
+  }
+  try{
+    const res=await fetch(webAppURL,{
+      method:'POST',
+      body: JSON.stringify(data),
+      headers:{ 'Content-Type': 'application/json' }
+    });
+    const result=await res.json();
+    if(result.status==='success') alert('Data saved to Google Sheet!');
+    else alert('Error: '+result.message);
+  }catch(err){ alert('Network error: '+err); console.error(err); }
+});
+</script>
+</body>
+</html>
