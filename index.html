@@ -259,14 +259,21 @@ document.getElementById("gameForm").addEventListener("submit", function(e) {
       document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
   }
 
-  const res = await fetch(GOOGLE_WEB_APP_URL, {
+const res = await fetch(GOOGLE_WEB_APP_URL, {
   method: "POST",
-  mode: "no-cors",
   headers: {
     "Content-Type": "application/json"
   },
   body: JSON.stringify(payload)
-  });
+});
+
+const json = await res.json();
+
+if (json.success) {
+  alert("Saved to Google Sheets!");
+} else {
+  alert("Save failed: " + (json.error || "Unknown error"));
+}
 
   const json = await res.json();
   if (json.result === "success") alert("Your submission was saved!");
@@ -276,5 +283,6 @@ document.getElementById("gameForm").addEventListener("submit", function(e) {
 
 </body>
 </html>
+
 
 
