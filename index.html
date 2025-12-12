@@ -244,45 +244,53 @@ document.querySelectorAll('input[type="range"]').forEach(slider => {
 
 <!-- GOOGLE SHEETS SUBMISSION SCRIPT -->
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznAnMeSPP11esTmwuIJ-RSCIOIDVAqZl2d778HZbN8pQNFJ2LmyUkQZECya9x6_MCT/exec";
+const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbznAnMeSPP11esTmwuIJ-RSCIOIDVAqZl2d778HZbN8pQNFJ2LmyUkQZECya9x6_MCT/exec";
 
-document.getElementById("gameForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-
-  const data = {
-    name: document.getElementById("name").value
-  };
-
-  for (let i = 1; i <= 6; i++) {
-    data[`q${i}_percent`] = document.getElementById(`q${i}_range`).value;
-    data[`q${i}_yesno`] =
-      document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
+window.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("gameForm");
+  if (!form) {
+    alert('DEBUG: form with id="gameForm" not found');
+    return;
   }
 
-const res = await fetch(GOOGLE_WEB_APP_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(payload)
-});
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    alert("DEBUG: submit handler fired ✅");
 
-const json = await res.json();
+    const payload = {
+      name: document.getElementById("name")?.value?.trim() || ""
+    };
 
-if (json.success) {
-  alert("Saved to Google Sheets!");
-} else {
-  alert("Save failed: " + (json.error || "Unknown error"));
-}
+    for (let i = 1; i <= 6; i++) {
+      payload[`q${i}_percent`] = document.getElementById(`q${i}_range`)?.value || "";
+      payload[`q${i}_yesno`] =
+        document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
+    }
 
-  const json = await res.json();
-  if (json.result === "success") alert("Your submission was saved!");
-  else alert("There was an error saving your response.");
+    try {
+      const res = await fetch(GOOGLE_WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      alert("DEBUG: fetch completed ✅ (status " + res.status + ")");
+
+      const text = await res.text();
+      alert("DEBUG: response body = " + text);
+
+    } catch (err) {
+      alert("DEBUG: fetch threw error ❌ " + err);
+      console.error(err);
+    }
+  });
 });
 </script>
 
+
 </body>
 </html>
+
 
 
 
