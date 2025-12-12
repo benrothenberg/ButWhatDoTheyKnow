@@ -270,45 +270,28 @@
         document.querySelector(`input[name="q${i}_yesno"]:checked`)?.value || "";
     }
 
-    try {
-      const body = new URLSearchParams();
-body.append("payload", JSON.stringify(payload));
+   try {
+  const body = new URLSearchParams();
+  body.append("payload", JSON.stringify(payload));
 
-const res = await fetch(GOOGLE_WEB_APP_URL, {
-  method: "POST",
-  body
-});
+  fetch(GOOGLE_WEB_APP_URL, {
+    method: "POST",
+    body
+  });
 
+  alert("Saved! ✅");
+  form.reset();
 
-      const text = await res.text();
-      console.log("Apps Script response:", text);
+} catch (err) {
+  alert("Save failed ❌");
+}
 
-      // Try parsing JSON if present
-      let json = null;
-      try { json = JSON.parse(text); } catch {}
-
-      if (json && json.success) {
-        alert("Saved! ✅");
-        form.reset();
-
-        // Reset slider bubbles after reset
-        document.querySelectorAll('input[type="range"]').forEach(slider => {
-          slider.value = 50;
-          updateBubble(slider, slider.nextElementSibling);
-        });
-      } else {
-        alert("Save failed ❌ (check console)");
-      }
-
-    } catch (err) {
-      console.error(err);
-      alert("Save failed ❌ " + err);
-    }
   });
 </script>
 
 </body>
 </html>
+
 
 
 
